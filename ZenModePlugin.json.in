@@ -1,0 +1,14 @@
+{
+    "Id" : "zenmodeplugin",
+    "Name" : "ZenModePlugin",
+    "Version" : "0.0.1",
+    "CompatVersion" : "0.0.1",
+    "Vendor" : "MyCompany",
+    "VendorId" : "mycompany",
+    "Copyright" : "(C) MyCompany",
+    "License" : "Put short license information here",
+    "Description" : "Put a short description of your plugin here",
+    "Url" : "https://www.mycompany.com",
+    "DocumentationUrl" : "",
+    ${IDE_PLUGIN_DEPENDENCIES}
+}
