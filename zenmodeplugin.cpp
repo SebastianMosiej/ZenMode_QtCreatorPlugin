@@ -55,6 +55,7 @@ void printAvailableCommandsIDs()
     });
 }
 
+const Utils::Id OUTPUT_PANE_COMMAND_ID{"QtCreator.Pane.GeneralMessages"};
 
 ZenModePluginCore::~ZenModePluginCore()
 { }
@@ -65,26 +66,61 @@ void ZenModePluginCore::initialize()
     menu->menu()->setTitle(Tr::tr("Zen Mode"));
     ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
 
-    ActionBuilder(this, Constants::ACTION_ID)
+    ActionBuilder(this, Constants::ZEN_ACTION_ID)
         .addToContainer(Constants::MENU_ID)
         .setText(Tr::tr("Toogle Zen Mode"))
         .setDefaultKeySequence(Tr::tr("Shift+Alt+Z"))
         .addOnTriggered(this, &ZenModePluginCore::triggerAction);
+
+    ActionBuilder(this, Constants::HIDE_ACTION_ID)
+        .addToContainer(Constants::MENU_ID)
+        .setText(Tr::tr("Hide All Tool Panes"))
+        .setDefaultKeySequence(Tr::tr("Shift+Escape"))
+        .addOnTriggered(this, &ZenModePluginCore::hideOutputPanes);
 }
 
 void ZenModePluginCore::extensionsInitialized()
 { }
+
+bool ZenModePluginCore::delayedInitialize()
+{
+    getActions();
+    return true;
+}
 
 ZenModePluginCore::ShutdownFlag ZenModePluginCore::aboutToShutdown()
 {
     return SynchronousShutdown;
 }
 
+void ZenModePluginCore::getActions()
+{
+    if (const Core::Command* cmd = Core::ActionManager::command(OUTPUT_PANE_COMMAND_ID))
+    {
+        m_outputPaneAction = cmd->action();
+    } else {
+        qWarning() << "ZenModePlugin - fail to get" <<  OUTPUT_PANE_COMMAND_ID.toString() << "action";
+    }
+}
+
+void ZenModePluginCore::hideOutputPanes()
+{
+    if (m_outputPaneAction)
+    {
+        m_outputPaneAction->trigger();
+        m_outputPaneAction->trigger();
+    }
+}
+
 void ZenModePluginCore::triggerAction()
 {
     m_active = !m_active;
+    qDebug() << "ZenMode::triggerAction - state" << (m_active ? "ACTIVE" : "INACTIVE") ;
+    if (m_active)
+    {
+        hideOutputPanes();
+    }
 }
-
 } // namespace ZenModePlugin::Internal
 
 #include <zenmodeplugin.moc>

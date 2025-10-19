@@ -15,18 +15,24 @@ class ZenModePluginCore final : public ExtensionSystem::IPlugin
 
 public:
     ZenModePluginCore() = default;
-
     ~ZenModePluginCore() final;
 
     void initialize() final;
     void extensionsInitialized() final;
     ShutdownFlag aboutToShutdown() final;
+    bool delayedInitialize() override;
+
+private:
+    void getActions();
+
+    void triggerAction();
+
+    void hideOutputPanes();
 
 private:
     bool m_active{0};
 
-private:
-    void triggerAction();
+    QPointer<QAction> m_outputPaneAction;
 };
 
 } // namespace ZenModePlugin::Internal
