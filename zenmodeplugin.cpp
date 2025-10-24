@@ -10,6 +10,7 @@
 #include <coreplugin/icore.h>
 #include <coreplugin/editormanager/editormanager.h>
 #include <texteditor/texteditor.h>
+#include <texteditor/marginsettings.h>
 
 #include <QAction>
 #include <QMenu>
@@ -69,6 +70,108 @@ const std::vector<Utils::Id> TOGGLE_MODES_STATES_COMMANDS = {
     "QtCreator.Modes.IconsOnly",
     "QtCreator.Modes.IconsAndText"
 };
+
+class CustomTextEditorWidget : public TextEditor::TextEditorWidget
+{
+    Q_OBJECT
+public:
+    explicit CustomTextEditorWidget(QWidget *parent = nullptr)
+        : TextEditor::TextEditorWidget(parent)
+    {
+    }
+
+    // Public method to set custom extra area width
+    void setCustomExtraAreaWidth(int width)
+    {
+        m_customExtraAreaWidth = width;
+        // return TextEditor::TextEditorWidget::extraAreaWidth(markWidthPtr);
+        //updateExtraAreaWidth();
+        // int ea_width = this->extraAreaWidth();
+
+        // Update viewport margins - this makes the text editor shift right
+        // setViewportMargins(ea_width, 0, 0, 0);
+        setViewportMargins(width, 0, 0, 0);
+
+        // // Update extra area geometry to match
+        // QWidget *ea = extraArea();
+        // if (ea) {
+        //     QRect cr = contentsRect();
+        //     // ea->setGeometry(QRect(cr.left(), cr.top(), ea_width, cr.height()));
+        //     ea->setGeometry(QRect(cr.left(), cr.top(), width, cr.height()));
+        // }
+    }
+
+private:
+    int m_customExtraAreaWidth = 0;
+
+    // Override to use custom width
+    virtual int extraAreaWidth(int *markWidthPtr = nullptr) const override
+    {
+        if (m_customExtraAreaWidth > 0) {
+            return m_customExtraAreaWidth;
+        }
+        return TextEditor::TextEditorWidget::extraAreaWidth(markWidthPtr);
+    }
+
+    // Method to update viewport margins and extra area geometry
+    void updateExtraAreaWidth()
+    {
+    }
+
+protected:
+    // Override resizeEvent to keep extra area synchronized
+    void resizeEvent(QResizeEvent *e) override
+    {
+        TextEditor::TextEditorWidget::resizeEvent(e);
+
+        if (m_customExtraAreaWidth > 0) {
+            int width = extraAreaWidth();
+            QRect cr = contentsRect();
+            QWidget *ea = extraArea();
+            if (ea) {
+                ea->setGeometry(QRect(cr.left(), cr.top(), width, cr.height()));
+            }
+        }
+    }
+};
+
+class TextEditorWidgetAccessor : public TextEditor::TextEditorWidget
+{
+public:
+    static void setMargins(TextEditor::TextEditorWidget *widget, int left, int top, int right, int bottom)
+    {
+        // Cast to accessor to get access to protected method
+        TextEditorWidgetAccessor *accessor = static_cast<TextEditorWidgetAccessor*>(widget);
+        accessor->setViewportMargins(left, top, right, bottom);
+    }
+
+    static void updateExtraAreaGeometry(TextEditor::TextEditorWidget *widget, int width)
+    {
+        TextEditorWidgetAccessor *accessor = static_cast<TextEditorWidgetAccessor*>(widget);
+
+        // Update viewport margins
+        auto margins = accessor->viewportMargins();
+        qDebug() << "=> updateExtraAreaGeometry " << width << ", margins " << margins << " before";
+        accessor->setViewportMargins(width, 0, 0, 0);
+        auto margins2 = accessor->viewportMargins();
+        qDebug() << "=> updateExtraAreaGeometry viewport contentMargins" <<
+            widget->viewport()->contentsMargins() << ",  margins " <<
+            margins2 << ",  after";
+
+        // Update extra area geometry
+        QWidget *extraArea = widget->extraArea();
+        if (extraArea) {
+            QRect cr = widget->contentsRect();
+            extraArea->setGeometry(QRect(cr.left(), cr.top(), width, cr.height()));
+        }
+    }
+};
+
+// Usage in your plugin code
+void setCustomExtraAreaWidth(TextEditor::TextEditorWidget *editorWidget, int width)
+{
+    TextEditorWidgetAccessor::updateExtraAreaGeometry(editorWidget, width);
+}
 
 ZenModePluginCore::~ZenModePluginCore()
 { }
@@ -159,49 +262,42 @@ void ZenModePluginCore::triggerTextEditorTextCenter()
 {
     // Get the current editor
     Core::IEditor *currentEditor = Core::EditorManager::currentEditor();
+    qDebug() << "=> currentEditor " << currentEditor;
     if (currentEditor) {
         // Cast to text editor
-        TextEditor::BaseTextEditor *textEditor =
-            qobject_cast<TextEditor::BaseTextEditor*>(currentEditor);
+        auto *textEditor = qobject_cast<TextEditor::BaseTextEditor*>(currentEditor);
 
+        qDebug() << "=> textEditor " << textEditor;
         if (textEditor) {
-            // Access the widget
-            QPlainTextEdit *editorWidget =
-                qobject_cast<QPlainTextEdit*>(textEditor->editorWidget());
+            TextEditor::TextEditorWidget * editorWidget = textEditor->editorWidget();
+            auto *qPlainTestEdit = qobject_cast<QPlainTextEdit*>(textEditor->editorWidget());
+            auto *PlainTextEdit  = qobject_cast<Utils::PlainTextEdit*>(editorWidget);
+            qDebug() << "=> editorWidget " << editorWidget;
 
             if (editorWidget) {
+                // Cast to your custom widget type
+                CustomTextEditorWidget *customWidget = qobject_cast<CustomTextEditorWidget*>(textEditor->editorWidget());
+                CustomTextEditorWidget *customWidget1 = static_cast<CustomTextEditorWidget*>(textEditor->editorWidget());
+
+                QWidget * extraAreaWidget = editorWidget->extraArea();
                 // if (m_active)
                 {
-                    // QMargins orgMargin = editorWidget->viewportMargins();
+                    if (m_active)
+                    {
 
-                    // Apply centered margins
-                    // int margin = 200; // Or calculate dynamically
-                    // editorWidget->setViewportMargins(margin, 0, margin, 0);
-                    // qInfo() << "=> triggering TextEditor margins " << orgMargin;
-                    // editorWidget->setViewportMargins(orgMargin.left(), orgMargin.top(), orgMargin.right(), orgMargin.bottom());
-                }
-            }
-        }
-    }
-}
-
-void ZenModePluginCore::triggerTextEditorTextCenter()
-{
-    // Get the current editor
-    Core::IEditor *currentEditor = Core::EditorManager::currentEditor();
-    if (currentEditor) {
-        // Cast to text editor
-        TextEditor::BaseTextEditor *textEditor =
-            qobject_cast<TextEditor::BaseTextEditor*>(currentEditor);
-
-        if (textEditor) {
-            // Access the widget
-            QPlainTextEdit *editorWidget =
-                qobject_cast<QPlainTextEdit*>(textEditor->editorWidget());
-
-            if (editorWidget) {
-                // if (m_active)
-                {
+                        m_prevExtraAreaWidth = extraAreaWidget->width();
+                        setCustomExtraAreaWidth(editorWidget, 300);
+                        // extraAreaWidget->setFixedWidth(200);
+                        // m_prevMargin = editorWidget->document()->documentMargin();
+                        // editorWidget->document()->setDocumentMargin(0);
+                        // qInfo() << "=> prev margin " << m_prevMargin;
+                    } else {
+                        // if (customWidget) {
+                        //     customWidget->setCustomExtraAreaWidth(300); // Set to 200 or 300 as needed
+                        // }
+                        setCustomExtraAreaWidth(editorWidget, std::max(m_prevExtraAreaWidth, 0));
+                        // editorWidget->document()->setDocumentMargin(m_prevMargin);
+                    }
                     // QMargins orgMargin = editorWidget->viewportMargins();
 
                     // Apply centered margins

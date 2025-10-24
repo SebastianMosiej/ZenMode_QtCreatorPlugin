@@ -63,6 +63,9 @@ private:
 
     QPointer<QAction> m_toggleFullscreenAction;
     QPointer<QMainWindow> m_window;
+
+    int m_prevMargin;
+    int m_prevExtraAreaWidth;
 };
 
 } // namespace ZenModePlugin::Internal

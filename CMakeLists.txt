@@ -37,6 +37,7 @@ add_qtc_plugin(ZenModePlugin
   PLUGIN_DEPENDS
     QtCreator::Core
     QtCreator::TextEditor
+    QtCreator::CppEditor
   DEPENDS
     Qt::Widgets
     QtCreator::ExtensionSystem
