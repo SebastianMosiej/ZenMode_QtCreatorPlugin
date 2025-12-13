@@ -55,7 +55,12 @@ target_sources(ZenModePlugin
     zenmodeplugin.h
 )
 
+SET(QtCreatorExecutable "" CACHE PATH "Path to Qt Creator binary")
+message(STATUS "Qt Creator binary path provided from outside ${QtCreatorExecutable}")
+
 # Enable the Run button in Qt Creator
+if (NOT QtCreatorExecutable)
+
 get_target_property(QtCreatorCorePath QtCreator::Core LOCATION)
 cmake_path(GET QtCreatorCorePath PARENT_PATH QtCreatorCorePath)
 find_program(QtCreatorExecutable
@@ -66,6 +71,11 @@ find_program(QtCreatorExecutable
     "${QtCreatorCorePath}/../../../MacOS"
   NO_DEFAULT_PATH
 )
+    message(STATUS "Using found Qt Creator binary path ${QtCreatorExecutable}")
+else()
+    message(STATUS "Using provided Qt Creator binary path ${QtCreatorExecutable}")
+endif()
+
 if (QtCreatorExecutable)
   add_custom_target(RunQtCreator
     COMMAND ${QtCreatorExecutable} -pluginpath $<TARGET_FILE_DIR:ZenModePlugin>
