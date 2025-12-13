@@ -16,6 +16,46 @@ using namespace Core;
 
 namespace ZenModePlugin::Internal {
 
+void printAvailableCommandsIDs()
+{
+    QFile outputFile("command_ids_list.log");
+    outputFile.open(QIODeviceBase::Truncate | QIODeviceBase::WriteOnly);
+    QTextStream outTextStr(&outputFile);
+
+    QList<Core::Command*> allCommands = Core::ActionManager::commands();
+    // Iterate through all commands and print their IDs
+    for (Core::Command* cmd : allCommands) {
+        QString actionString;
+        outTextStr << "Command ID '" << cmd->id().toString()
+                   << "', Description '" << cmd->description()
+                   << "', has Action '" << (cmd->action() != nullptr)
+                   << "', action check state'" << ((cmd->action() != nullptr) ? (cmd->action()->isChecked() ? "CHECKED" : "UNCHECKED") :"null")
+                   << "'\n";
+        if (QAction* action = cmd->action()) {
+            actionString += QString("action %1").arg(cmd->action()->isChecked() ? "CHECKED" : "UNCHECKED");
+        }
+
+        QString msg = QString("=> Command ID: %1, Description: %2").arg(cmd->id().toString()).arg(cmd->description());
+        qDebug() << msg << actionString;
+    }
+    outputFile.close();
+
+    QObject::connect(Core::ActionManager::instance(), &Core::ActionManager::commandAdded, [](Utils::Id id) {
+        QFile outputFile("command_ids_list.log");
+        outputFile.open(QIODeviceBase::Append);
+        QTextStream outTextStr(&outputFile);
+        if (const Core::Command* cmd = Core::ActionManager::command(id)) {
+            outTextStr << "Command Added - ID '" << cmd->id().toString()
+                       << "', Description '" << cmd->description()
+                       << "', has Action '" << (cmd->action() != nullptr)
+                       << "', action check state'" << ((cmd->action() != nullptr) ? (cmd->action()->isChecked() ? "CHECKED" : "UNCHECKED") :"null")
+                   << "'\n";
+        }
+        outputFile.close();
+    });
+}
+
+
 ZenModePluginCore::~ZenModePluginCore()
 { }
 
