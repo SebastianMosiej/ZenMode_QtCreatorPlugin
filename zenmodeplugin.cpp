@@ -185,6 +185,36 @@ void ZenModePluginCore::triggerTextEditorTextCenter()
     }
 }
 
+void ZenModePluginCore::triggerTextEditorTextCenter()
+{
+    // Get the current editor
+    Core::IEditor *currentEditor = Core::EditorManager::currentEditor();
+    if (currentEditor) {
+        // Cast to text editor
+        TextEditor::BaseTextEditor *textEditor =
+            qobject_cast<TextEditor::BaseTextEditor*>(currentEditor);
+
+        if (textEditor) {
+            // Access the widget
+            QPlainTextEdit *editorWidget =
+                qobject_cast<QPlainTextEdit*>(textEditor->editorWidget());
+
+            if (editorWidget) {
+                // if (m_active)
+                {
+                    // QMargins orgMargin = editorWidget->viewportMargins();
+
+                    // Apply centered margins
+                    // int margin = 200; // Or calculate dynamically
+                    // editorWidget->setViewportMargins(margin, 0, margin, 0);
+                    // qInfo() << "=> triggering TextEditor margins " << orgMargin;
+                    // editorWidget->setViewportMargins(orgMargin.left(), orgMargin.top(), orgMargin.right(), orgMargin.bottom());
+                }
+            }
+        }
+    }
+}
+
 void ZenModePluginCore::hideOutputPanes()
 {
     if (m_outputPaneAction)
