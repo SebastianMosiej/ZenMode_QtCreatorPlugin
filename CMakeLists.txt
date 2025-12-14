@@ -36,6 +36,7 @@ endif()
 add_qtc_plugin(ZenModePlugin
   PLUGIN_DEPENDS
     QtCreator::Core
+    QtCreator::TextEditor
   DEPENDS
     Qt::Widgets
     QtCreator::ExtensionSystem

@@ -8,6 +8,8 @@
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/icore.h>
+#include <coreplugin/editormanager/editormanager.h>
+#include <texteditor/texteditor.h>
 
 #include <QAction>
 #include <QMenu>
@@ -153,6 +155,36 @@ void ZenModePluginCore::getActions()
     }
 }
 
+void ZenModePluginCore::triggerTextEditorTextCenter()
+{
+    // Get the current editor
+    Core::IEditor *currentEditor = Core::EditorManager::currentEditor();
+    if (currentEditor) {
+        // Cast to text editor
+        TextEditor::BaseTextEditor *textEditor =
+            qobject_cast<TextEditor::BaseTextEditor*>(currentEditor);
+
+        if (textEditor) {
+            // Access the widget
+            QPlainTextEdit *editorWidget =
+                qobject_cast<QPlainTextEdit*>(textEditor->editorWidget());
+
+            if (editorWidget) {
+                // if (m_active)
+                {
+                    // QMargins orgMargin = editorWidget->viewportMargins();
+
+                    // Apply centered margins
+                    // int margin = 200; // Or calculate dynamically
+                    // editorWidget->setViewportMargins(margin, 0, margin, 0);
+                    // qInfo() << "=> triggering TextEditor margins " << orgMargin;
+                    // editorWidget->setViewportMargins(orgMargin.left(), orgMargin.top(), orgMargin.right(), orgMargin.bottom());
+                }
+            }
+        }
+    }
+}
+
 void ZenModePluginCore::hideOutputPanes()
 {
     if (m_outputPaneAction)
@@ -257,6 +289,7 @@ void ZenModePluginCore::triggerAction()
         restoreModeSidebar();
         fullScreenMode(false);
     }
+    // triggerTextEditorTextCenter();
 }
 } // namespace ZenModePlugin::Internal
 

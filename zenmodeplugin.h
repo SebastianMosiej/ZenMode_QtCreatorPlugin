@@ -37,6 +37,8 @@ public:
 private:
     void getActions();
 
+    void triggerTextEditorTextCenter();
+
     void triggerAction();
 
     void hideOutputPanes();
