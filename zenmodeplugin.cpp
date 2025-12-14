@@ -58,6 +58,13 @@ void printAvailableCommandsIDs()
 const Utils::Id LEFT_SIDEBAR_COMMAND_ID{"QtCreator.ToggleLeftSidebar"};
 const Utils::Id RIGHT_SIDEBAR_COMMAND_ID{"QtCreator.ToggleRightSidebar"};
 const Utils::Id OUTPUT_PANE_COMMAND_ID{"QtCreator.Pane.GeneralMessages"};
+const ZenModePluginCore::ModeStyle MODES_STATE_ON_ACTIVE_ZENMODE{ZenModePluginCore::ModeStyle::Hidden};
+
+const std::vector<Utils::Id> TOGGLE_MODES_STATES_COMMANDS = {
+    "QtCreator.Modes.Hidden",
+    "QtCreator.Modes.IconsOnly",
+    "QtCreator.Modes.IconsAndText"
+};
 
 ZenModePluginCore::~ZenModePluginCore()
 { }
@@ -92,6 +99,7 @@ bool ZenModePluginCore::delayedInitialize()
 
 ZenModePluginCore::ShutdownFlag ZenModePluginCore::aboutToShutdown()
 {
+    restoreModeSidebar();
     restoreSidebars();
     return SynchronousShutdown;
 }
@@ -116,6 +124,19 @@ void ZenModePluginCore::getActions()
         m_toggleRightSidebarAction = cmd->action();
     } else {
         qWarning() << "ZenModePlugin - fail to get" <<  RIGHT_SIDEBAR_COMMAND_ID.toString() << "action";
+    }
+
+    m_toggleModesStatesActions.resize(3);
+    for (int i = 0; i < TOGGLE_MODES_STATES_COMMANDS.size(); i++)
+    {
+        if (const Core::Command* cmd = Core::ActionManager::command(TOGGLE_MODES_STATES_COMMANDS[i]))
+        {
+            m_toggleModesStatesActions[i] = cmd->action();
+            if (cmd->action()->isChecked())
+            {
+                m_prevModesSidebarState = (ModeStyle)i;
+            }
+        }
     }
 }
 
@@ -167,6 +188,39 @@ void ZenModePluginCore::restoreSidebars()
     }
 }
 
+void ZenModePluginCore::hideModeSidebar()
+{
+    for (int i = 0; i < m_toggleModesStatesActions.size(); i++)
+    {
+        auto action = m_toggleModesStatesActions[i];
+            qDebug(QString("=> hideModeSidebar mode (%1), hasAction %2, checkState %3").arg(i)
+                       .arg(action != nullptr)
+                       // .arg(action->isChecked())
+                       .arg(false)
+                       .toLatin1());
+        if (action && action->isChecked())
+        {
+            m_prevModesSidebarState = (ModeStyle)i;
+        }
+    }
+    auto action = m_toggleModesStatesActions[MODES_STATE_ON_ACTIVE_ZENMODE];
+    if (action && !action->isChecked())
+    {
+        action->trigger();
+    }
+}
+
+void ZenModePluginCore::restoreModeSidebar()
+{
+    if (m_prevModesSidebarState >= ModeStyle::Hidden && m_prevModesSidebarState <= ModeStyle::IconsAndText)
+    {
+        auto action = m_toggleModesStatesActions[m_prevModesSidebarState];
+        if (action && !action->isChecked()) {
+            action->trigger();
+        }
+    }
+}
+
 void ZenModePluginCore::triggerAction()
 {
     m_active = !m_active;
@@ -175,8 +229,10 @@ void ZenModePluginCore::triggerAction()
     {
         hideOutputPanes();
         hideSidebars();
+        hideModeSidebar();
     } else {
         restoreSidebars();
+        restoreModeSidebar();
     }
 }
 } // namespace ZenModePlugin::Internal

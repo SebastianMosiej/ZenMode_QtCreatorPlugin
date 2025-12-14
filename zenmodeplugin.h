@@ -22,6 +22,14 @@ public:
     ShutdownFlag aboutToShutdown() final;
     bool delayedInitialize() override;
 
+public:
+    enum ModeStyle {
+        Hidden = 0,
+        IconsOnly = 1,
+        IconsAndText = 2
+    };
+    Q_ENUM(ModeStyle);
+
 private:
     void getActions();
 
@@ -42,6 +50,9 @@ private:
     QPointer<QAction> m_toggleRightSidebarAction;
     bool m_prevLeftSidebarState{false};
     bool m_prevRightSidebarState{false};
+
+    std::vector<QPointer<QAction>> m_toggleModesStatesActions;
+    ModeStyle m_prevModesSidebarState{};
 };
 
 } // namespace ZenModePlugin::Internal
