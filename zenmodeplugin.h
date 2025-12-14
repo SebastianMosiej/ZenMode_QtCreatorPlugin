@@ -6,6 +6,10 @@
 #include <QAction>
 #include <QMenu>
 
+QT_BEGIN_NAMESPACE
+class QMainWindow;
+QT_END_NAMESPACE
+
 namespace ZenModePlugin::Internal {
 
 class ZenModePluginCore final : public ExtensionSystem::IPlugin
@@ -41,6 +45,7 @@ private:
 
     void hideModeSidebar();
     void restoreModeSidebar();
+    void fullScreenMode(bool state);
 
 private:
     bool m_active{0};
@@ -53,6 +58,9 @@ private:
 
     std::vector<QPointer<QAction>> m_toggleModesStatesActions;
     ModeStyle m_prevModesSidebarState{};
+
+    QPointer<QAction> m_toggleFullscreenAction;
+    QPointer<QMainWindow> m_window;
 };
 
 } // namespace ZenModePlugin::Internal
