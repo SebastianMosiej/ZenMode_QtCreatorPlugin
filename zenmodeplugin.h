@@ -28,11 +28,20 @@ private:
     void triggerAction();
 
     void hideOutputPanes();
+    void hideSidebars();
+    void restoreSidebars();
+
+    void hideModeSidebar();
+    void restoreModeSidebar();
 
 private:
     bool m_active{0};
 
     QPointer<QAction> m_outputPaneAction;
+    QPointer<QAction> m_toggleLeftSidebarAction;
+    QPointer<QAction> m_toggleRightSidebarAction;
+    bool m_prevLeftSidebarState{false};
+    bool m_prevRightSidebarState{false};
 };
 
 } // namespace ZenModePlugin::Internal
