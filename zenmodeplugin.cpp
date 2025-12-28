@@ -44,6 +44,12 @@ void ZenModePluginCore::initialize()
         .setText(Tr::tr("Toogle Distraction Free Mode"))
         .setDefaultKeySequence(Tr::tr("Shift+Escape"))
         .addOnTriggered(this, &ZenModePluginCore::toggleDistractionFreeMode);
+
+    ActionBuilder(this, Constants::ZEN_MODE_ACTION_ID)
+        .addToContainer(Constants::MENU_ID)
+        .setText(Tr::tr("Toogle Zen Mode"))
+        .setDefaultKeySequence(Tr::tr("Shift+Alt+Z"))
+        .addOnTriggered(this, &ZenModePluginCore::toggleZenMode);
 }
 
 void ZenModePluginCore::extensionsInitialized()
@@ -209,8 +215,19 @@ void ZenModePluginCore::setSidebarsModesVisibility(bool _visible)
     }
 }
 
+void ZenModePluginCore::toggleZenMode()
+{
+    m_distractionFreeModeActive = false;
+    m_zenModeActive = !m_zenModeActive;
+
+    setSidebarsModesVisibility(m_zenModeActive);
+    setFullScreenMode(m_zenModeActive);
+    m_menuBar->setVisible(!m_zenModeActive);
+}
+
 void ZenModePluginCore::toggleDistractionFreeMode()
 {
+    m_zenModeActive = false;
     m_distractionFreeModeActive = !m_distractionFreeModeActive;
 
     setSidebarsModesVisibility(m_distractionFreeModeActive);
