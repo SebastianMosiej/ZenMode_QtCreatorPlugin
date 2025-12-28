@@ -39,6 +39,7 @@ private:
     void getActions();
 
     void toggleDistractionFreeMode();
+    void toggleZenMode();
 
     void hideOutputPanes();
     void hideSidebars();
@@ -52,6 +53,7 @@ private:
 
 private:
     bool m_distractionFreeModeActive{0};
+    bool m_zenModeActive{0};
 
     QPointer<QAction> m_outputPaneAction;
     QPointer<QAction> m_toggleLeftSidebarAction;
