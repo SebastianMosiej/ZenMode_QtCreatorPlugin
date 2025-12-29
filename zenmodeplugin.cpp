@@ -210,10 +210,9 @@ void ZenModePluginCore::restoreModeSidebar()
     }
 }
 
-void ZenModePluginCore::toggleDistractionFreeMode()
+void ZenModePluginCore::setSidebarsModesVisibility(bool _visible)
 {
-    m_distractionFreeModeActive = !m_distractionFreeModeActive;
-    if (m_distractionFreeModeActive)
+    if (_visible)
     {
         hideOutputPanes();
         hideSidebars();
@@ -222,6 +221,13 @@ void ZenModePluginCore::toggleDistractionFreeMode()
         restoreSidebars();
         restoreModeSidebar();
     }
+}
+
+void ZenModePluginCore::toggleDistractionFreeMode()
+{
+    m_distractionFreeModeActive = !m_distractionFreeModeActive;
+
+    setSidebarsModesVisibility(m_distractionFreeModeActive);
 }
 } // namespace ZenModePlugin::Internal
 
